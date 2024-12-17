@@ -4,16 +4,14 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins: string[] = [
-    // 'http://localhost:8084',
-    // 'https://staging.your-domain.com',
-    // 'https://your-domain.com'
+  // Safely gather allowed origins from environment variables and filter out invalid ones
+  const allowedOrigins = [
     process.env.LOCAL_ORIGINS,
-    // process.env.NETLIFY_FINAL_ORIGINS,
     process.env.RANDOM_ORIGINS,
     process.env.VERCLE_FINAL_ORIGINS,
-    process.env.VERCLE_ORIGINS
-  ];
+    process.env.VERCLE_ORIGINS,
+  ].filter(Boolean); // Removes any undefined or empty string values
+
   const corsOptions = {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -22,7 +20,9 @@ async function bootstrap() {
 
   app.enableCors(corsOptions);
 
-  console.log('Port:', process.env.PORT); // Verify PORT variable for debugging
+  console.log('CORS origins set to:', allowedOrigins); // Debugging log
+  console.log('Port:', process.env.PORT); // Debugging log
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
