@@ -11,7 +11,11 @@ export class UrlController {
   @Post('shorten')
   async shortenUrl(@Body('originalUrl') originalUrl: string) {
     const result = await this.urlService.shortenUrl(originalUrl);
-    return { shortUrl: `http://localhost:3000/url/${result.shortUrl}` };
+    
+    // Dynamically use the BASE_URL environment variable
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    
+    return { shortUrl: `${baseUrl}/url/${result.shortUrl}` };
   }
 
   /**
