@@ -8,17 +8,37 @@ import * as shortid from 'shortid';
 export class UrlService {
   constructor(@InjectModel(Url.name) private urlModel: Model<UrlDocument>) {}
 
-  async shortenUrl(originalUrl: string): Promise<Url> {
+  /**
+   * Shortens the original URL and saves it into the database.
+   * @param originalUrl The URL to shorten
+   */
+  async shortenUrl(originalUrl: string): Promise<{ shortUrl: string }> {
+    // Check if URL already exists
+    const existingUrl = await this.urlModel.findOne({ originalUrl });
+    if (existingUrl) {
+      return { shortUrl: existingUrl.shortUrl };
+    }
+
+    // Generate a unique short URL identifier
     const shortUrl = shortid.generate();
+
+    // Save to database
     const newUrl = new this.urlModel({ originalUrl, shortUrl });
-    return newUrl.save();
+    await newUrl.save();
+
+    return { shortUrl };
   }
 
-  async getOriginalUrl(shortUrl: string): Promise<Url> {
-    const url = await this.urlModel.findOne({ shortUrl }).exec();
-    if (!url) {
-      throw new NotFoundException('Short URL not found');
+  /**
+   * Fetch the original URL by short URL
+   * @param shortUrl The short URL identifier
+   */
+  async getOriginalUrl(shortUrl: string): Promise<string> {
+    const urlDoc = await this.urlModel.findOne({ shortUrl });
+    if (!urlDoc) {
+      throw new NotFoundException('Short URL does not exist');
     }
-    return url;
+
+    return urlDoc.originalUrl;
   }
 }

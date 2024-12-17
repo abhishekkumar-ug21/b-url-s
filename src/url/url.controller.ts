@@ -5,18 +5,30 @@ import { UrlService } from './url.service';
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
+  /**
+   * Accepts the original URL and returns a short URL
+   */
   @Post('shorten')
   async shortenUrl(@Body('originalUrl') originalUrl: string) {
     const result = await this.urlService.shortenUrl(originalUrl);
-    return { shortUrl: result.shortUrl };
+    return { shortUrl: `http://localhost:3000/url/${result.shortUrl}` };
   }
 
+  /**
+   * Redirects to the original URL when visiting the short URL
+   */
   @Get(':shortUrl')
   async redirectToOriginal(
     @Param('shortUrl') shortUrl: string,
     @Res() res,
   ) {
-    const url = await this.urlService.getOriginalUrl(shortUrl);
-    return res.redirect(HttpStatus.FOUND, url.originalUrl);
+    try {
+      const originalUrl = await this.urlService.getOriginalUrl(shortUrl);
+      return res.redirect(HttpStatus.FOUND, originalUrl);
+    } catch (error) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: 'URL not found',
+      });
+    }
   }
 }
