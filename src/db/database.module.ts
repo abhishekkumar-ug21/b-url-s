@@ -19,7 +19,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         
         // Debugging logs
         console.log('NODE_ENV:', configService.get<string>('NODE_ENV'));
-        console.log('MongoDB URI for connection:', uri);
+        // console.log('MongoDB URI for connection:', uri);
+        console.log('MongoDB URI for connection: remove the uri from console');
 
         if (!uri) {
           throw new Error('MongoDB URI is undefined');
